@@ -5,12 +5,38 @@ import axios from 'axios'
 export const Forms = () => {
   const [userInfo, setUserInfo] = useState({
     name: '',
-    country: '',
+    country: [],
   })
   const [state, setState] = useState({
     loading : false,
     error: ''
   })
+
+  const [countries, setCountries] = useState([])
+
+  useEffect(() => {
+    const getCountries = async() => {
+      try {
+        const { data } = await axios({
+          method: 'GET',
+          baseURL: 'https://restcountries.eu',
+          url: '/rest/v2/all'
+        })
+
+        const countries = data.map((country) => (
+          country.name
+        ))
+        console.log('countries', countries)
+        setCountries(countries)
+      } catch (error) {
+        console.log('error: ', error)
+      }
+    }
+
+    getCountries()
+  }, [])
+
+
 
   const handleChange = (e) => {
     e.preventDefault()
@@ -35,7 +61,6 @@ export const Forms = () => {
         error: error.response.data.message,
         loading: false 
       })
-      console.log()
     }
   }
 
@@ -59,6 +84,15 @@ export const Forms = () => {
                     {!! state.error && <Form.Text className='text-muted'>{state.error}</Form.Text>}
                   
                 </Form.Group>
+                <Form.Select 
+                aria-label='Default select example'
+                name='country' 
+                onChange={handleChange}>
+                  <option>Select One Country</option>      
+                {!!countries && countries.length > 0 && countries.map((country) => (
+                  <option value={country}>{country}</option>
+                ))}
+                </Form.Select>
                 <Button 
                 variant='primary' 
                 type='submit'
